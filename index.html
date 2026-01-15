@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Swamp</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="menu-screen" class="screen active">
+            <h1>ZOMBIE SWAMP</h1>
+            <p class="subtitle">Survive the undead horde</p>
+            <button id="start-button" class="menu-button">Start Game</button>
+            <button id="instructions-button" class="menu-button">Instructions</button>
+        </div>
+
+        <div id="instructions-screen" class="screen">
+            <h2>How to Play</h2>
+            <div class="instructions-content">
+                <p><strong>Objective:</strong> Eliminate all zombies by luring them into swamps</p>
+                <ul>
+                    <li>Use <strong>Arrow Keys</strong> or <strong>WASD</strong> to move</li>
+                    <li>Both you and zombies move once per second</li>
+                    <li>Zombies always move toward you</li>
+                    <li>Lead zombies into swamps to eliminate them</li>
+                    <li>Don't step into swamps or touch zombies!</li>
+                    <li>Collect powerups for special abilities</li>
+                </ul>
+                <p class="tip"><strong>Tip:</strong> Listen for the ticking clock - it tells you when you can move!</p>
+            </div>
+            <button id="back-button" class="menu-button">Back</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div id="hud">
+                <div class="hud-section">
+                    <span class="hud-label">Score:</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="hud-section">
+                    <span class="hud-label">Level:</span>
+                    <span id="level">1</span>
+                </div>
+                <div class="hud-section">
+                    <span class="hud-label">Lives:</span>
+                    <span id="lives">❤️❤️❤️</span>
+                </div>
+                <div class="hud-section">
+                    <span class="hud-label">Zombies:</span>
+                    <span id="zombie-count">0</span>
+                </div>
+            </div>
+
+            <div id="game-area">
+                <canvas id="game-canvas"></canvas>
+            </div>
+
+            <div id="powerups-display"></div>
+        </div>
+
+        <div id="game-over-screen" class="screen">
+            <h2 id="game-over-title">Game Over</h2>
+            <div id="game-over-stats">
+                <p>Final Score: <span id="final-score">0</span></p>
+                <p>Level Reached: <span id="final-level">1</span></p>
+                <p>Zombies Eliminated: <span id="total-zombies">0</span></p>
+            </div>
+            <button id="retry-button" class="menu-button">Retry</button>
+            <button id="menu-button" class="menu-button">Main Menu</button>
+        </div>
+
+        <div id="level-complete-screen" class="screen">
+            <h2>Level Complete!</h2>
+            <div id="level-stats">
+                <p>Score: <span id="level-score">0</span></p>
+                <p>Bonus: <span id="level-bonus">0</span></p>
+                <p>Total: <span id="level-total">0</span></p>
+            </div>
+            <button id="next-level-button" class="menu-button">Next Level</button>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

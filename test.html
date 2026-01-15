@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Swamp - Test</title>
+    <style>
+        body {
+            background: #1a1a2e;
+            color: white;
+            font-family: monospace;
+            padding: 20px;
+        }
+        #status {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #666;
+        }
+        .info {
+            color: #4a9d5f;
+        }
+        .error {
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Zombie Swamp - Debug Test</h1>
+    <div id="status">
+        <p>Status: <span class="info">Initializing...</span></p>
+        <p>Press F12 to open console for debug logs</p>
+    </div>
+
+    <div id="test-container">
+        <p>Click "Start Game" in the main page, then press WASD or Arrow keys</p>
+        <p>Watch the browser console (F12) for debug messages</p>
+        <p><strong>Expected behavior:</strong></p>
+        <ul>
+            <li>Tick sound every 1 second</li>
+            <li>Player (green circle) should move when you press keys</li>
+            <li>Zombies (red circles) move toward you</li>
+            <li>Blue tiles are swamps (deadly)</li>
+        </ul>
+    </div>
+
+    <hr>
+    <p><a href="index.html">← Back to Game</a></p>
+
+    <script>
+        // Test script
+        console.log('%c=== ZOMBIE SWAMP DEBUG TEST ===', 'color: #4a9d5f; font-size: 16px; font-weight: bold;');
+        console.log('Open index.html to play the game');
+        console.log('This page is just for testing');
+
+        // Log when keys are pressed
+        document.addEventListener('keydown', (e) => {
+            console.log('Key pressed:', e.key);
+        });
+    </script>
+</body>
+</html>
