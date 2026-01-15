@@ -507,9 +507,9 @@ class Game {
 
         this.initializeLevel();
         this.showScreen('game');
-        this.startTurnTimer();
         this.isRunning = true;
-        this.render();
+        this.startTurnTimer();
+        this.startAnimationLoop(); // Restart the animation loop
     }
 
     gameOver() {
