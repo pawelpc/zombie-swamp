@@ -76,11 +76,18 @@ class Player extends Entity {
         super(x, y);
         this.hasShield = false;
         this.queuedMove = null;
+        this.direction = 'down'; // Current facing direction
     }
 
     queueMove(direction) {
         console.log('Player queued move:', direction);
         this.queuedMove = direction;
+
+        // Update facing direction based on movement
+        if (direction.x < 0) this.direction = 'left';
+        else if (direction.x > 0) this.direction = 'right';
+        else if (direction.y < 0) this.direction = 'up';
+        else if (direction.y > 0) this.direction = 'down';
     }
 
     executeMove(grid) {
@@ -587,9 +594,10 @@ class Game {
         // Draw grid lines
         this.drawGrid();
 
-        // Draw swamps
+        // Draw swamps with animated grass
         this.swamps.forEach(swamp => {
-            this.drawTile(swamp.x, swamp.y, '#2a5f7f', '#1a4f6f');
+            const swampFrame = this.spriteRenderer.getSwampFrame();
+            swampFrame.draw(this.ctx, swamp.x, swamp.y, CONFIG.TILE_SIZE);
         });
 
         // Draw zombies with sprite system
@@ -599,7 +607,8 @@ class Game {
         });
 
         // Draw player with sprite system
-        this.spriteRenderer.sprites.player.default(this.ctx, this.player.x, this.player.y, CONFIG.TILE_SIZE);
+        const playerFrame = this.spriteRenderer.getPlayerFrame(this.player.direction, this.state.currentTurn);
+        playerFrame.draw(this.ctx, this.player.x, this.player.y, CONFIG.TILE_SIZE);
 
         // Draw shield effect if player has shield
         if (this.player.hasShield) {

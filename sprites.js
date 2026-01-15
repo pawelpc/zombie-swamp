@@ -14,6 +14,7 @@ class SpriteRenderer {
         // Create sprite sheets for each entity type
         this.sprites.zombie = this.createZombieSprites();
         this.sprites.player = this.createPlayerSprites();
+        this.sprites.swamp = this.createSwampSprites();
     }
 
     // Create zombie sprites with directional animations
@@ -1028,6 +1029,122 @@ class SpriteRenderer {
         const frameIndex = animTime % 4; // 4 frames per direction
 
         return this.sprites.player[direction][frameIndex];
+    }
+
+    // Create swamp sprites with waving grass animation
+    createSwampSprites() {
+        const frames = [];
+        const frameCount = 8; // 8 frames for smooth waving
+
+        for (let i = 0; i < frameCount; i++) {
+            frames.push({
+                frame: i,
+                draw: (ctx, x, y, size) => this.drawSwamp(ctx, x, y, size, i)
+            });
+        }
+
+        return frames;
+    }
+
+    // Draw swamp tile with waving grass tufts
+    drawSwamp(ctx, x, y, size, frame) {
+        const pixelX = x * size;
+        const pixelY = y * size;
+
+        // Water/swamp base
+        ctx.fillStyle = '#1a3f4f'; // Dark murky water
+        ctx.fillRect(pixelX, pixelY, size, size);
+
+        // Slightly lighter water patches for depth
+        ctx.fillStyle = '#2a5f6f';
+        ctx.fillRect(pixelX + size * 0.2, pixelY + size * 0.3, size * 0.3, size * 0.3);
+        ctx.fillRect(pixelX + size * 0.6, pixelY + size * 0.1, size * 0.25, size * 0.25);
+        ctx.fillRect(pixelX + size * 0.1, pixelY + size * 0.7, size * 0.2, size * 0.2);
+
+        // Border
+        ctx.strokeStyle = '#0a2f3f';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pixelX, pixelY, size, size);
+
+        // Calculate wave animation (smooth sine wave)
+        const waveTime = (frame / 8) * Math.PI * 2;
+        const waveOffset1 = Math.sin(waveTime) * 2;
+        const waveOffset2 = Math.sin(waveTime + Math.PI / 2) * 2;
+        const waveOffset3 = Math.sin(waveTime + Math.PI) * 2;
+        const waveOffset4 = Math.sin(waveTime + Math.PI * 1.5) * 2;
+
+        // Draw grass tufts at different positions with wave animation
+        ctx.save();
+        ctx.translate(pixelX + size / 2, pixelY + size / 2);
+
+        // Tuft 1 (top-left area)
+        this.drawGrassTuft(ctx, -size * 0.25, -size * 0.2, size * 0.15, waveOffset1);
+
+        // Tuft 2 (top-right area)
+        this.drawGrassTuft(ctx, size * 0.2, -size * 0.15, size * 0.12, waveOffset2);
+
+        // Tuft 3 (bottom-left area)
+        this.drawGrassTuft(ctx, -size * 0.3, size * 0.25, size * 0.13, waveOffset3);
+
+        // Tuft 4 (bottom-right area)
+        this.drawGrassTuft(ctx, size * 0.25, size * 0.2, size * 0.14, waveOffset4);
+
+        // Tuft 5 (center, slightly offset)
+        this.drawGrassTuft(ctx, size * 0.05, size * 0.05, size * 0.16, waveOffset1 * 0.7);
+
+        ctx.restore();
+    }
+
+    // Draw a single grass tuft with waving animation
+    drawGrassTuft(ctx, x, y, height, waveOffset) {
+        const bladeCount = 5; // Number of grass blades per tuft
+        const baseWidth = height * 0.4;
+
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Draw individual grass blades
+        for (let i = 0; i < bladeCount; i++) {
+            const bladeX = (i - bladeCount / 2) * (baseWidth / bladeCount);
+            const bladeHeight = height * (0.8 + Math.random() * 0.4);
+            const bladeTilt = waveOffset * (0.05 + i * 0.02); // Different tilt for each blade
+
+            // Grass blade color variations (swamp grass - darker greens)
+            const greenShades = ['#3a5f4a', '#4a7a5a', '#2a4f3a', '#5a8a6a'];
+            ctx.strokeStyle = greenShades[i % greenShades.length];
+            ctx.lineWidth = 1.5;
+            ctx.lineCap = 'round';
+
+            // Draw curved blade
+            ctx.beginPath();
+            ctx.moveTo(bladeX, 0);
+
+            // Control point for curve (creates waving effect)
+            const cpX = bladeX + bladeTilt * 3;
+            const cpY = -bladeHeight * 0.5;
+            const endX = bladeX + bladeTilt * 5;
+            const endY = -bladeHeight;
+
+            ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+            ctx.stroke();
+
+            // Add a little tip to each blade
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.beginPath();
+            ctx.arc(endX, endY, 1, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+
+    // Get current animation frame for swamp
+    getSwampFrame() {
+        // Slower animation for swamps (gentle waving)
+        const animTime = Math.floor(Date.now() / 400); // Change frame every 400ms
+        const frameIndex = animTime % 8; // 8 frames for smooth waving
+
+        return this.sprites.swamp[frameIndex];
     }
 
     // Update animation (called each frame)
