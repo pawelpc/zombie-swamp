@@ -350,11 +350,487 @@ class SpriteRenderer {
         ctx.restore();
     }
 
-    // Create player sprites (enhanced version)
+    // Create player sprites with directional animations
     createPlayerSprites() {
         return {
-            default: (ctx, x, y, size) => this.drawPlayer(ctx, x, y, size)
+            up: this.generatePlayerFrames('up'),
+            down: this.generatePlayerFrames('down'),
+            left: this.generatePlayerFrames('left'),
+            right: this.generatePlayerFrames('right')
         };
+    }
+
+    // Generate animation frames for player in given direction
+    generatePlayerFrames(direction) {
+        const frames = [];
+        const frameCount = 4; // 4 frames per walk cycle
+
+        for (let i = 0; i < frameCount; i++) {
+            frames.push({
+                direction: direction,
+                frame: i,
+                draw: (ctx, x, y, size) => this.drawPlayerDirectional(ctx, x, y, size, direction, i)
+            });
+        }
+
+        return frames;
+    }
+
+    // Draw player sprite with animation
+    drawPlayerDirectional(ctx, x, y, size, direction, frame) {
+        const pixelX = x * size + size / 2;
+        const pixelY = y * size + size / 2;
+        const radius = size / 3;
+
+        ctx.save();
+        ctx.translate(pixelX, pixelY);
+
+        // Bobbing animation based on frame
+        const bobOffset = Math.sin((frame / 4) * Math.PI * 2) * 2;
+        ctx.translate(0, bobOffset);
+
+        // Draw player based on direction
+        switch(direction) {
+            case 'left':
+                this.drawPlayerLeft(ctx, radius, frame);
+                break;
+            case 'right':
+                this.drawPlayerRight(ctx, radius, frame);
+                break;
+            case 'up':
+                this.drawPlayerBack(ctx, radius, frame);
+                break;
+            case 'down':
+                this.drawPlayerFront(ctx, radius, frame);
+                break;
+        }
+
+        ctx.restore();
+    }
+
+    // Player walking LEFT (side view, facing left)
+    drawPlayerLeft(ctx, radius, frame) {
+        const headSize = radius * 0.75;
+
+        // Legs (drawn first, behind body) - side view narrower
+        const legSwing = (frame === 1 || frame === 2) ? 0.5 : -0.4;
+        this.drawPlayerSideLeg(ctx, -radius * 0.15, radius * 0.7, legSwing);
+        this.drawPlayerSideLeg(ctx, radius * 0.15, radius * 0.7, -legSwing);
+
+        // Body/Torso (hero armor) - side profile narrower
+        ctx.fillStyle = '#3a7d5f'; // Darker green for armor
+        ctx.beginPath();
+        ctx.ellipse(0, 0, radius * 0.6, radius * 1.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2a6d4f';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Chest plate highlight (side view)
+        ctx.fillStyle = '#4a9d6f';
+        ctx.beginPath();
+        ctx.ellipse(0, -radius * 0.1, radius * 0.4, radius * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Arms - front and back
+        const armSwing = (frame === 1 || frame === 2) ? 0.4 : -0.3;
+        this.drawPlayerSideArm(ctx, -radius * 0.3, 0, armSwing, radius, true); // Front arm
+        this.drawPlayerSideArm(ctx, radius * 0.1, 0, -armSwing * 0.5, radius, false); // Back arm
+
+        // Head (side profile)
+        ctx.fillStyle = '#ffd7a8'; // Skin tone
+        ctx.beginPath();
+        ctx.ellipse(-radius * 0.15, -radius * 0.9, headSize * 0.8, headSize, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#e0b88a';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Hair (side profile)
+        ctx.fillStyle = '#8b4513'; // Brown hair
+        ctx.beginPath();
+        ctx.ellipse(-headSize * 0.2, -radius * 0.9 - headSize * 0.2, headSize * 0.7, headSize * 0.6, 0, Math.PI, Math.PI * 2);
+        ctx.fill();
+
+        // Hair strands (side)
+        ctx.strokeStyle = '#6b3513';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-headSize * 0.6, -radius * 0.9 - headSize * 0.6);
+        ctx.lineTo(-headSize * 0.5, -radius * 0.9 - headSize * 0.2);
+        ctx.stroke();
+
+        // One visible eye (left side)
+        ctx.fillStyle = '#ffffff';
+        const eyeSize = headSize * 0.2;
+        ctx.beginPath();
+        ctx.arc(-headSize * 0.5, -radius * 0.9 - headSize * 0.05, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pupil
+        ctx.fillStyle = '#2a5f8f'; // Blue eye
+        ctx.beginPath();
+        ctx.arc(-headSize * 0.5, -radius * 0.9 - headSize * 0.05, eyeSize * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye highlight
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-headSize * 0.5 + eyeSize * 0.2, -radius * 0.9 - headSize * 0.15, eyeSize * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Nose (side profile)
+        ctx.strokeStyle = '#d0a88a';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-headSize * 0.65, -radius * 0.9 + headSize * 0.05);
+        ctx.lineTo(-headSize * 0.75, -radius * 0.9 + headSize * 0.15);
+        ctx.lineTo(-headSize * 0.65, -radius * 0.9 + headSize * 0.18);
+        ctx.stroke();
+
+        // Mouth (side profile)
+        ctx.strokeStyle = '#c08060';
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(-headSize * 0.5, -radius * 0.9 + headSize * 0.35, headSize * 0.3, 0.3, 1.2);
+        ctx.stroke();
+
+        // Belt (side view)
+        ctx.strokeStyle = '#8b6914';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-radius * 0.5, radius * 0.5);
+        ctx.lineTo(radius * 0.5, radius * 0.5);
+        ctx.stroke();
+    }
+
+    // Player walking RIGHT (side view, facing right)
+    drawPlayerRight(ctx, radius, frame) {
+        ctx.scale(-1, 1); // Mirror the left-facing sprite
+        this.drawPlayerLeft(ctx, radius, frame);
+    }
+
+    // Player walking DOWN (front view, toward camera)
+    drawPlayerFront(ctx, radius, frame) {
+        const headSize = radius * 0.75;
+
+        // Legs (drawn first, behind body)
+        const legSwing = (frame === 1 || frame === 2) ? 0.3 : -0.2;
+        this.drawPlayerFrontLeg(ctx, -radius * 0.3, radius * 0.7, legSwing);
+        this.drawPlayerFrontLeg(ctx, radius * 0.3, radius * 0.7, -legSwing);
+
+        // Body/Torso (hero armor)
+        ctx.fillStyle = '#3a7d5f'; // Darker green for armor
+        ctx.beginPath();
+        ctx.ellipse(0, 0, radius * 0.85, radius * 1.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2a6d4f';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Chest plate highlight
+        ctx.fillStyle = '#4a9d6f';
+        ctx.beginPath();
+        ctx.ellipse(0, -radius * 0.1, radius * 0.6, radius * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Arms swinging
+        const armSwing = (frame === 1 || frame === 2) ? 0.4 : -0.3;
+        this.drawPlayerFrontArm(ctx, -radius * 0.85, 0, armSwing, radius);
+        this.drawPlayerFrontArm(ctx, radius * 0.85, 0, -armSwing, radius);
+
+        // Head
+        ctx.fillStyle = '#ffd7a8'; // Skin tone
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9, headSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#e0b88a';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Hair
+        ctx.fillStyle = '#8b4513'; // Brown hair
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9 - headSize * 0.2, headSize * 0.9, Math.PI, Math.PI * 2);
+        ctx.fill();
+
+        // Hair strands
+        ctx.strokeStyle = '#6b3513';
+        ctx.lineWidth = 1.5;
+        for (let i = -1; i <= 1; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * headSize * 0.3, -radius * 0.9 - headSize * 0.7);
+            ctx.lineTo(i * headSize * 0.25, -radius * 0.9 - headSize * 0.3);
+            ctx.stroke();
+        }
+
+        // Eyes
+        ctx.fillStyle = '#ffffff';
+        const eyeOffset = headSize * 0.3;
+        const eyeSize = headSize * 0.2;
+
+        // Left eye
+        ctx.beginPath();
+        ctx.arc(-eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+        // Right eye
+        ctx.beginPath();
+        ctx.arc(eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pupils
+        ctx.fillStyle = '#2a5f8f'; // Blue eyes
+        ctx.beginPath();
+        ctx.arc(-eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye highlights (make eyes sparkle)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(-eyeOffset + eyeSize * 0.2, -radius * 0.9 - headSize * 0.15, eyeSize * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(eyeOffset + eyeSize * 0.2, -radius * 0.9 - headSize * 0.15, eyeSize * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eyebrows (heroic expression)
+        ctx.strokeStyle = '#6b3513';
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        // Left eyebrow
+        ctx.beginPath();
+        ctx.moveTo(-eyeOffset - eyeSize * 0.8, -radius * 0.9 - headSize * 0.35);
+        ctx.lineTo(-eyeOffset + eyeSize * 0.5, -radius * 0.9 - headSize * 0.3);
+        ctx.stroke();
+        // Right eyebrow
+        ctx.beginPath();
+        ctx.moveTo(eyeOffset - eyeSize * 0.5, -radius * 0.9 - headSize * 0.3);
+        ctx.lineTo(eyeOffset + eyeSize * 0.8, -radius * 0.9 - headSize * 0.35);
+        ctx.stroke();
+
+        // Nose
+        ctx.strokeStyle = '#d0a88a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, -radius * 0.9 + headSize * 0.05);
+        ctx.lineTo(headSize * 0.1, -radius * 0.9 + headSize * 0.15);
+        ctx.stroke();
+
+        // Smile (confident hero)
+        ctx.strokeStyle = '#c08060';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9 + headSize * 0.3, headSize * 0.45, 0.15, Math.PI - 0.15);
+        ctx.stroke();
+
+        // Belt (optional detail)
+        ctx.strokeStyle = '#8b6914';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-radius * 0.8, radius * 0.5);
+        ctx.lineTo(radius * 0.8, radius * 0.5);
+        ctx.stroke();
+
+        // Belt buckle
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(-radius * 0.15, radius * 0.4, radius * 0.3, radius * 0.2);
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-radius * 0.15, radius * 0.4, radius * 0.3, radius * 0.2);
+    }
+
+    // Player walking UP (back view, away from camera)
+    drawPlayerBack(ctx, radius, frame) {
+        const headSize = radius * 0.75;
+
+        // Legs (drawn first, behind body)
+        const legSwing = (frame === 1 || frame === 2) ? 0.3 : -0.2;
+        this.drawPlayerFrontLeg(ctx, -radius * 0.3, radius * 0.7, legSwing);
+        this.drawPlayerFrontLeg(ctx, radius * 0.3, radius * 0.7, -legSwing);
+
+        // Body/Torso (hero armor) - back view
+        ctx.fillStyle = '#2a6d4f'; // Darker shade for back
+        ctx.beginPath();
+        ctx.ellipse(0, 0, radius * 0.85, radius * 1.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#1a5d3f';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Backpack/Cape suggestion
+        ctx.fillStyle = '#3a5f4f';
+        ctx.beginPath();
+        ctx.ellipse(0, -radius * 0.1, radius * 0.6, radius * 0.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Arms swinging (back view)
+        const armSwing = (frame === 1 || frame === 2) ? -0.4 : 0.3;
+        this.drawPlayerBackArm(ctx, -radius * 0.85, 0, armSwing, radius);
+        this.drawPlayerBackArm(ctx, radius * 0.85, 0, -armSwing, radius);
+
+        // Head (back of head)
+        ctx.fillStyle = '#ffd7a8'; // Skin tone
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9, headSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#e0b88a';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Hair (back of head - fuller)
+        ctx.fillStyle = '#8b4513'; // Brown hair
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9, headSize * 0.95, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hair strands (back detail)
+        ctx.strokeStyle = '#6b3513';
+        ctx.lineWidth = 1.5;
+        for (let i = -1; i <= 1; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * headSize * 0.4, -radius * 0.9 - headSize * 0.6);
+            ctx.lineTo(i * headSize * 0.3, -radius * 0.9 + headSize * 0.5);
+            ctx.stroke();
+        }
+
+        // Neck/collar visible at top
+        ctx.strokeStyle = '#3a7d5f';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9 + headSize, headSize * 0.4, 0, Math.PI);
+        ctx.stroke();
+
+        // Belt (back view)
+        ctx.strokeStyle = '#8b6914';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-radius * 0.8, radius * 0.5);
+        ctx.lineTo(radius * 0.8, radius * 0.5);
+        ctx.stroke();
+    }
+
+    // Side view arm for player
+    drawPlayerSideArm(ctx, x, y, angle, radius, isFront) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = isFront ? '#ffd7a8' : '#e0b88a'; // Skin tone, front arm brighter
+        ctx.lineWidth = isFront ? 3.5 : 2.5;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, radius * 0.6);
+        ctx.stroke();
+
+        // Hand
+        ctx.fillStyle = isFront ? '#ffd7a8' : '#e0b88a';
+        ctx.beginPath();
+        ctx.arc(0, radius * 0.6, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Side view leg for player
+    drawPlayerSideLeg(ctx, x, y, angle) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = '#3a5f4f'; // Dark pants
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, 8);
+        ctx.stroke();
+
+        // Boot
+        ctx.fillStyle = '#4a3520'; // Brown boot
+        ctx.beginPath();
+        ctx.ellipse(0, 8, 3, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Front view arm for player
+    drawPlayerFrontArm(ctx, x, y, angle, radius) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = '#ffd7a8'; // Skin tone
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, radius * 0.6);
+        ctx.stroke();
+
+        // Hand
+        ctx.fillStyle = '#ffd7a8';
+        ctx.beginPath();
+        ctx.arc(0, radius * 0.6, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Front view leg for player
+    drawPlayerFrontLeg(ctx, x, y, angle) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = '#3a5f4f'; // Dark pants
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, 8);
+        ctx.stroke();
+
+        // Boot
+        ctx.fillStyle = '#4a3520'; // Brown boot
+        ctx.beginPath();
+        ctx.arc(0, 8, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Back view arm for player
+    drawPlayerBackArm(ctx, x, y, angle, radius) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = '#e0b88a'; // Slightly darker skin for back
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, radius * 0.6);
+        ctx.stroke();
+
+        // Hand
+        ctx.fillStyle = '#e0b88a';
+        ctx.beginPath();
+        ctx.arc(0, radius * 0.6, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
     }
 
     drawPlayer(ctx, x, y, size) {
@@ -543,6 +1019,15 @@ class SpriteRenderer {
         const frameIndex = animTime % 4; // 4 frames per direction
 
         return this.sprites.zombie[direction][frameIndex];
+    }
+
+    // Get current animation frame for player
+    getPlayerFrame(direction, turnNumber) {
+        // Use Date.now() for continuous animation instead of turn-based
+        const animTime = Math.floor(Date.now() / 250); // Change frame every 250ms
+        const frameIndex = animTime % 4; // 4 frames per direction
+
+        return this.sprites.player[direction][frameIndex];
     }
 
     // Update animation (called each frame)
