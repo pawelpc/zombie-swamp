@@ -1066,73 +1066,102 @@ class SpriteRenderer {
         ctx.lineWidth = 2;
         ctx.strokeRect(pixelX, pixelY, size, size);
 
-        // Calculate wave animation (smooth sine wave)
+        // Calculate wave animation (smooth sine wave for bending)
         const waveTime = (frame / 8) * Math.PI * 2;
-        const waveOffset1 = Math.sin(waveTime) * 2;
-        const waveOffset2 = Math.sin(waveTime + Math.PI / 2) * 2;
-        const waveOffset3 = Math.sin(waveTime + Math.PI) * 2;
-        const waveOffset4 = Math.sin(waveTime + Math.PI * 1.5) * 2;
 
         // Draw grass tufts at different positions with wave animation
         ctx.save();
         ctx.translate(pixelX + size / 2, pixelY + size / 2);
 
-        // Tuft 1 (top-left area)
-        this.drawGrassTuft(ctx, -size * 0.25, -size * 0.2, size * 0.15, waveOffset1);
+        // Create multiple grass tufts across the tile
+        // Tuft 1 (left area)
+        this.drawGrassTuft(ctx, -size * 0.3, size * 0.35, size * 0.5, waveTime);
 
-        // Tuft 2 (top-right area)
-        this.drawGrassTuft(ctx, size * 0.2, -size * 0.15, size * 0.12, waveOffset2);
+        // Tuft 2 (center-left)
+        this.drawGrassTuft(ctx, -size * 0.1, size * 0.35, size * 0.55, waveTime + Math.PI / 3);
 
-        // Tuft 3 (bottom-left area)
-        this.drawGrassTuft(ctx, -size * 0.3, size * 0.25, size * 0.13, waveOffset3);
+        // Tuft 3 (center)
+        this.drawGrassTuft(ctx, size * 0.05, size * 0.35, size * 0.52, waveTime + Math.PI / 2);
 
-        // Tuft 4 (bottom-right area)
-        this.drawGrassTuft(ctx, size * 0.25, size * 0.2, size * 0.14, waveOffset4);
+        // Tuft 4 (center-right)
+        this.drawGrassTuft(ctx, size * 0.2, size * 0.35, size * 0.48, waveTime + Math.PI * 2 / 3);
 
-        // Tuft 5 (center, slightly offset)
-        this.drawGrassTuft(ctx, size * 0.05, size * 0.05, size * 0.16, waveOffset1 * 0.7);
+        // Tuft 5 (right area)
+        this.drawGrassTuft(ctx, size * 0.35, size * 0.35, size * 0.5, waveTime + Math.PI);
 
         ctx.restore();
     }
 
     // Draw a single grass tuft with waving animation
-    drawGrassTuft(ctx, x, y, height, waveOffset) {
-        const bladeCount = 5; // Number of grass blades per tuft
-        const baseWidth = height * 0.4;
+    drawGrassTuft(ctx, x, y, height, wavePhase) {
+        const bladeCount = 7; // Number of grass blades per tuft
+        const baseWidth = height * 0.3;
 
         ctx.save();
         ctx.translate(x, y);
 
-        // Draw individual grass blades
+        // Calculate bend amount from wave phase (swaying back and forth)
+        const bendAmount = Math.sin(wavePhase) * 0.15; // -0.15 to 0.15 radians
+
+        // Draw individual grass blades from back to front
         for (let i = 0; i < bladeCount; i++) {
             const bladeX = (i - bladeCount / 2) * (baseWidth / bladeCount);
-            const bladeHeight = height * (0.8 + Math.random() * 0.4);
-            const bladeTilt = waveOffset * (0.05 + i * 0.02); // Different tilt for each blade
+            // Vary heights slightly for natural look
+            const heightVariation = 0.85 + (i % 3) * 0.1;
+            const bladeHeight = height * heightVariation;
 
-            // Grass blade color variations (swamp grass - darker greens)
-            const greenShades = ['#3a5f4a', '#4a7a5a', '#2a4f3a', '#5a8a6a'];
+            // Each blade bends slightly differently based on position
+            const individualBend = bendAmount * (1 + (i - bladeCount / 2) * 0.1);
+
+            // Grass blade color variations (bright greens like sample image)
+            const greenShades = [
+                '#4CAF50', // bright green
+                '#66BB6A', // lighter green
+                '#45a049', // medium green
+                '#58c05c', // light bright green
+                '#4db34f', // medium bright green
+                '#3fa043', // darker green
+                '#5bc55f'  // very bright green
+            ];
             ctx.strokeStyle = greenShades[i % greenShades.length];
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2.5;
             ctx.lineCap = 'round';
 
-            // Draw curved blade
+            // Draw blade as a path that bends
             ctx.beginPath();
             ctx.moveTo(bladeX, 0);
 
-            // Control point for curve (creates waving effect)
-            const cpX = bladeX + bladeTilt * 3;
-            const cpY = -bladeHeight * 0.5;
-            const endX = bladeX + bladeTilt * 5;
+            // Create smooth curve for bending blade
+            // Bottom third - minimal bend
+            const cp1X = bladeX + individualBend * bladeHeight * 0.1;
+            const cp1Y = -bladeHeight * 0.33;
+
+            // Middle third - more bend
+            const cp2X = bladeX + individualBend * bladeHeight * 0.3;
+            const cp2Y = -bladeHeight * 0.66;
+
+            // Top - maximum bend
+            const endX = bladeX + individualBend * bladeHeight * 0.5;
             const endY = -bladeHeight;
 
-            ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+            // Draw smooth curve through control points
+            ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY);
             ctx.stroke();
 
-            // Add a little tip to each blade
+            // Draw pointed tip at end
+            ctx.save();
+            ctx.translate(endX, endY);
+            ctx.rotate(Math.atan2(endY - cp2Y, endX - cp2X) - Math.PI / 2);
+
             ctx.fillStyle = ctx.strokeStyle;
             ctx.beginPath();
-            ctx.arc(endX, endY, 1, 0, Math.PI * 2);
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-1.5, 3);
+            ctx.lineTo(1.5, 3);
+            ctx.closePath();
             ctx.fill();
+
+            ctx.restore();
         }
 
         ctx.restore();
