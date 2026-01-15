@@ -194,11 +194,72 @@ class Game {
         // Keyboard controls
         document.addEventListener('keydown', (e) => this.handleInput(e));
 
+        // Touch controls
+        this.setupTouchControls();
+
         // Canvas setup
         this.canvas = document.getElementById('game-canvas');
         this.ctx = this.canvas.getContext('2d');
-        this.canvas.width = CONFIG.GRID_SIZE * CONFIG.TILE_SIZE;
-        this.canvas.height = CONFIG.GRID_SIZE * CONFIG.TILE_SIZE;
+        this.setupCanvas();
+
+        // Handle window resize
+        window.addEventListener('resize', () => this.setupCanvas());
+    }
+
+    setupCanvas() {
+        const baseSize = CONFIG.GRID_SIZE * CONFIG.TILE_SIZE;
+
+        // Set canvas internal resolution
+        this.canvas.width = baseSize;
+        this.canvas.height = baseSize;
+
+        // Scale canvas for mobile devices
+        const maxSize = Math.min(window.innerWidth - 40, window.innerHeight - 300, baseSize);
+        this.canvas.style.width = maxSize + 'px';
+        this.canvas.style.height = maxSize + 'px';
+    }
+
+    setupTouchControls() {
+        const touchButtons = document.querySelectorAll('.touch-button');
+
+        touchButtons.forEach(button => {
+            // Handle both touch and mouse events for broader compatibility
+            const handlePress = (e) => {
+                e.preventDefault();
+                const direction = button.getAttribute('data-direction');
+                this.handleTouchInput(direction);
+            };
+
+            button.addEventListener('touchstart', handlePress);
+            button.addEventListener('mousedown', handlePress);
+        });
+    }
+
+    handleTouchInput(directionName) {
+        if (!this.isRunning) {
+            console.log('Game not running');
+            return;
+        }
+
+        if (!this.state.canMove) {
+            console.log('Cannot move yet - wait for tick');
+            return;
+        }
+
+        const directionMap = {
+            'up': DIRECTIONS.UP,
+            'down': DIRECTIONS.DOWN,
+            'left': DIRECTIONS.LEFT,
+            'right': DIRECTIONS.RIGHT
+        };
+
+        const direction = directionMap[directionName];
+        if (direction) {
+            console.log('Touch input:', directionName);
+            this.player.queueMove(direction);
+            this.state.canMove = false;
+            this.canvas.classList.remove('can-move');
+        }
     }
 
     showScreen(screenName) {
