@@ -214,7 +214,7 @@ class Game {
         this.showScreen('game');
         this.startTurnTimer();
         this.isRunning = true;
-        this.render();
+        this.startAnimationLoop();
     }
 
     stopGame() {
@@ -227,6 +227,20 @@ class Game {
             clearInterval(this.groanTimer);
             this.groanTimer = null;
         }
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+    }
+
+    startAnimationLoop() {
+        const animate = () => {
+            if (this.isRunning) {
+                this.render();
+                this.animationFrameId = requestAnimationFrame(animate);
+            }
+        };
+        animate();
     }
 
     initializeLevel() {
@@ -366,8 +380,7 @@ class Game {
             return;
         }
 
-        // Render
-        this.render();
+        // Update UI (rendering happens in animation loop)
         this.updateUI();
 
         // Open movement window for next turn (900ms to input, 100ms buffer)
@@ -550,8 +563,7 @@ class Game {
         if (direction) {
             console.log('Queuing move:', direction);
             this.player.queueMove(direction);
-            // Give immediate visual feedback
-            this.render();
+            // Rendering happens in animation loop
         }
     }
 

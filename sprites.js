@@ -264,7 +264,10 @@ class SpriteRenderer {
 
     // Get current animation frame for zombie
     getZombieFrame(direction, turnNumber) {
-        const frameIndex = Math.floor((turnNumber % (this.animationSpeed * 4)) / this.animationSpeed);
+        // Use Date.now() for continuous animation instead of turn-based
+        const animTime = Math.floor(Date.now() / 250); // Change frame every 250ms
+        const frameIndex = animTime % 4; // 4 frames per direction
+
         return this.sprites.zombie[direction][frameIndex];
     }
 
