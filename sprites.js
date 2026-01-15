@@ -55,80 +55,231 @@ class SpriteRenderer {
         const bobOffset = Math.sin((frame / 4) * Math.PI * 2) * 2;
         ctx.translate(0, bobOffset);
 
-        // Body (dark red/brown zombie color)
+        // Draw zombie based on direction
+        switch(direction) {
+            case 'left':
+                this.drawZombieLeft(ctx, radius, frame);
+                break;
+            case 'right':
+                this.drawZombieRight(ctx, radius, frame);
+                break;
+            case 'up':
+                this.drawZombieBack(ctx, radius, frame);
+                break;
+            case 'down':
+                this.drawZombieFront(ctx, radius, frame);
+                break;
+        }
+
+        ctx.restore();
+    }
+
+    // Zombie walking LEFT (side view, facing left)
+    drawZombieLeft(ctx, radius, frame) {
+        const headSize = radius * 0.7;
+
+        // Body (side view - narrower)
+        ctx.fillStyle = '#6b0000';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, radius * 0.6, radius * 1.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#8b0000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Head (side profile)
+        ctx.fillStyle = '#5a8a5a';
+        ctx.beginPath();
+        ctx.ellipse(-radius * 0.2, -radius * 0.8, headSize * 0.8, headSize, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#4a7a4a';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // One visible eye (left side)
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.arc(-headSize * 0.5, -radius * 0.8 - headSize * 0.1, headSize * 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        // Eye glow
+        ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+        ctx.beginPath();
+        ctx.arc(-headSize * 0.5, -radius * 0.8 - headSize * 0.1, headSize * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Arms - front arm swings more
+        const armSwing = (frame === 1 || frame === 2) ? 0.5 : -0.3;
+        this.drawZombieSideArm(ctx, -radius * 0.3, 0, armSwing, radius, true); // Front arm
+        this.drawZombieSideArm(ctx, radius * 0.1, 0, -armSwing * 0.5, radius, false); // Back arm
+
+        // Legs - alternating
+        const legForward = (frame === 1 || frame === 2) ? 0.6 : -0.4;
+        this.drawZombieSideLeg(ctx, -radius * 0.2, radius * 0.8, legForward);
+        this.drawZombieSideLeg(ctx, radius * 0.2, radius * 0.8, -legForward);
+    }
+
+    // Zombie walking RIGHT (side view, facing right)
+    drawZombieRight(ctx, radius, frame) {
+        ctx.scale(-1, 1); // Mirror the left-facing sprite
+        this.drawZombieLeft(ctx, radius, frame);
+    }
+
+    // Zombie walking DOWN (front view, toward camera)
+    drawZombieFront(ctx, radius, frame) {
+        const headSize = radius * 0.7;
+
+        // Body (front view)
         ctx.fillStyle = '#6b0000';
         ctx.beginPath();
         ctx.ellipse(0, 0, radius, radius * 1.2, 0, 0, Math.PI * 2);
         ctx.fill();
-
-        // Body outline
         ctx.strokeStyle = '#8b0000';
         ctx.lineWidth = 2;
         ctx.stroke();
 
         // Head
-        const headSize = radius * 0.7;
-        ctx.fillStyle = '#5a8a5a'; // Zombie green skin
+        ctx.fillStyle = '#5a8a5a';
         ctx.beginPath();
         ctx.arc(0, -radius * 0.8, headSize, 0, Math.PI * 2);
         ctx.fill();
-
         ctx.strokeStyle = '#4a7a4a';
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Eyes (glowing yellow)
+        // Both eyes visible (front view)
         ctx.fillStyle = '#ffff00';
-        const eyeOffset = headSize * 0.3;
-        const eyeSize = headSize * 0.2;
+        const eyeOffset = headSize * 0.35;
+        const eyeSize = headSize * 0.25;
 
         // Left eye
         ctx.beginPath();
-        ctx.arc(-eyeOffset, -radius * 0.8 - headSize * 0.1, eyeSize, 0, Math.PI * 2);
+        ctx.arc(-eyeOffset, -radius * 0.8, eyeSize, 0, Math.PI * 2);
         ctx.fill();
-
         // Right eye
         ctx.beginPath();
-        ctx.arc(eyeOffset, -radius * 0.8 - headSize * 0.1, eyeSize, 0, Math.PI * 2);
+        ctx.arc(eyeOffset, -radius * 0.8, eyeSize, 0, Math.PI * 2);
         ctx.fill();
 
-        // Eye glow effect
+        // Eye glow
         ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
         ctx.beginPath();
-        ctx.arc(-eyeOffset, -radius * 0.8 - headSize * 0.1, eyeSize * 1.5, 0, Math.PI * 2);
+        ctx.arc(-eyeOffset, -radius * 0.8, eyeSize * 1.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(eyeOffset, -radius * 0.8 - headSize * 0.1, eyeSize * 1.5, 0, Math.PI * 2);
+        ctx.arc(eyeOffset, -radius * 0.8, eyeSize * 1.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Mouth (jagged/undead)
+        // Mouth (open, menacing)
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(-headSize * 0.3, -radius * 0.8 + headSize * 0.4);
-        ctx.lineTo(-headSize * 0.1, -radius * 0.8 + headSize * 0.3);
-        ctx.lineTo(0, -radius * 0.8 + headSize * 0.4);
-        ctx.lineTo(headSize * 0.1, -radius * 0.8 + headSize * 0.3);
-        ctx.lineTo(headSize * 0.3, -radius * 0.8 + headSize * 0.4);
+        ctx.arc(0, -radius * 0.8 + headSize * 0.4, headSize * 0.3, 0.2, Math.PI - 0.2);
         ctx.stroke();
 
-        // Arms - animated based on walking frame
-        const armSwing = Math.sin((frame / 4) * Math.PI * 2) * 0.3;
-        this.drawZombieArm(ctx, -radius * 0.8, 0, armSwing, radius);
-        this.drawZombieArm(ctx, radius * 0.8, 0, -armSwing, radius);
+        // Arms swinging
+        const armSwing = (frame === 1 || frame === 2) ? 0.4 : -0.3;
+        this.drawZombieFrontArm(ctx, -radius * 0.9, 0, armSwing, radius);
+        this.drawZombieFrontArm(ctx, radius * 0.9, 0, -armSwing, radius);
 
-        // Legs - animated based on walking frame
-        const legSwing = Math.sin((frame / 4) * Math.PI * 2 + Math.PI) * 0.4;
-        this.drawZombieLeg(ctx, -radius * 0.3, radius * 0.8, legSwing);
-        this.drawZombieLeg(ctx, radius * 0.3, radius * 0.8, -legSwing);
+        // Legs walking toward camera
+        const legSwing = (frame === 1 || frame === 2) ? 0.3 : -0.2;
+        this.drawZombieFrontLeg(ctx, -radius * 0.35, radius * 0.8, legSwing);
+        this.drawZombieFrontLeg(ctx, radius * 0.35, radius * 0.8, -legSwing);
+    }
 
-        // Direction indicator (small arrow/marker)
-        this.drawDirectionIndicator(ctx, direction, radius);
+    // Zombie walking UP (back view, away from camera)
+    drawZombieBack(ctx, radius, frame) {
+        const headSize = radius * 0.7;
+
+        // Body (back view)
+        ctx.fillStyle = '#6b0000';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, radius, radius * 1.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#8b0000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Head (back of head, no face visible)
+        ctx.fillStyle = '#4a7a4a'; // Darker shade for back of head
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.8, headSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#3a6a3a';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Hair/back of head detail
+        ctx.strokeStyle = '#3a6a3a';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(-headSize * 0.4 + i * headSize * 0.4, -radius * 0.8 - headSize * 0.5);
+            ctx.lineTo(-headSize * 0.3 + i * headSize * 0.3, -radius * 0.8 + headSize * 0.5);
+            ctx.stroke();
+        }
+
+        // Arms swinging (back view)
+        const armSwing = (frame === 1 || frame === 2) ? -0.4 : 0.3;
+        this.drawZombieBackArm(ctx, -radius * 0.9, 0, armSwing, radius);
+        this.drawZombieBackArm(ctx, radius * 0.9, 0, -armSwing, radius);
+
+        // Legs walking away
+        const legSwing = (frame === 1 || frame === 2) ? 0.3 : -0.2;
+        this.drawZombieFrontLeg(ctx, -radius * 0.35, radius * 0.8, legSwing);
+        this.drawZombieFrontLeg(ctx, radius * 0.35, radius * 0.8, -legSwing);
+    }
+
+    // Side view arm (for left/right walking)
+    drawZombieSideArm(ctx, x, y, angle, radius, isFront) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = isFront ? '#5a8a5a' : '#4a7a4a'; // Front arm brighter
+        ctx.lineWidth = isFront ? 3 : 2;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, radius * 0.7);
+        ctx.stroke();
+
+        // Hand
+        ctx.fillStyle = isFront ? '#4a7a4a' : '#3a6a3a';
+        ctx.beginPath();
+        ctx.arc(0, radius * 0.7, 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.restore();
     }
 
-    drawZombieArm(ctx, x, y, angle, radius) {
+    // Side view leg (for left/right walking)
+    drawZombieSideLeg(ctx, x, y, angle) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = '#4a4a4a';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, 9);
+        ctx.stroke();
+
+        // Foot (pointing forward in side view)
+        ctx.fillStyle = '#3a3a3a';
+        ctx.beginPath();
+        ctx.ellipse(0, 9, 3, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Front view arm (for down walking)
+    drawZombieFrontArm(ctx, x, y, angle, radius) {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle);
@@ -145,13 +296,14 @@ class SpriteRenderer {
         // Hand
         ctx.fillStyle = '#4a7a4a';
         ctx.beginPath();
-        ctx.arc(0, radius * 0.8, 2, 0, Math.PI * 2);
+        ctx.arc(0, radius * 0.8, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();
     }
 
-    drawZombieLeg(ctx, x, y, angle) {
+    // Front view leg (for down/up walking)
+    drawZombieFrontLeg(ctx, x, y, angle) {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle);
@@ -174,36 +326,28 @@ class SpriteRenderer {
         ctx.restore();
     }
 
-    drawDirectionIndicator(ctx, direction, radius) {
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+    // Back view arm (for up walking)
+    drawZombieBackArm(ctx, x, y, angle, radius) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = '#4a7a4a'; // Darker for back view
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+
         ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, radius * 0.7);
+        ctx.stroke();
 
-        const offset = radius * 1.5;
-        switch(direction) {
-            case 'up':
-                ctx.moveTo(0, -offset);
-                ctx.lineTo(-3, -offset + 5);
-                ctx.lineTo(3, -offset + 5);
-                break;
-            case 'down':
-                ctx.moveTo(0, offset);
-                ctx.lineTo(-3, offset - 5);
-                ctx.lineTo(3, offset - 5);
-                break;
-            case 'left':
-                ctx.moveTo(-offset, 0);
-                ctx.lineTo(-offset + 5, -3);
-                ctx.lineTo(-offset + 5, 3);
-                break;
-            case 'right':
-                ctx.moveTo(offset, 0);
-                ctx.lineTo(offset - 5, -3);
-                ctx.lineTo(offset - 5, 3);
-                break;
-        }
-
-        ctx.closePath();
+        // Hand
+        ctx.fillStyle = '#3a6a3a';
+        ctx.beginPath();
+        ctx.arc(0, radius * 0.7, 2.5, 0, Math.PI * 2);
         ctx.fill();
+
+        ctx.restore();
     }
 
     // Create player sprites (enhanced version)
