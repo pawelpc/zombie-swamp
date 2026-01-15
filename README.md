@@ -2,14 +2,42 @@
 
 A turn-based strategy game where you must survive waves of zombies by strategically luring them into swamps.
 
+## How to Run the Game
+
+**IMPORTANT**: The game must be run through a local web server to load audio files properly.
+
+### Option 1: Using Python (Recommended)
+```bash
+# Windows
+start-server.bat
+
+# Mac/Linux
+chmod +x start-server.sh
+./start-server.sh
+```
+
+### Option 2: Using Node.js
+```bash
+node server.js
+```
+
+### Option 3: Manual Python Server
+```bash
+# Python 3
+python -m http.server 8000
+
+# Then open http://localhost:8000 in your browser
+```
+
+Once the server is running, open **http://localhost:8000** in your web browser.
+
 ## How to Play
 
-1. Open `index.html` in a web browser (Chrome, Firefox, Safari, or Edge)
-2. Click "Start Game" to begin
-3. Use arrow keys or WASD to move your character
-4. Lead zombies into swamps to eliminate them
-5. Avoid stepping into swamps or touching zombies
-6. Clear all zombies to complete the level
+1. Click "Start Game" to begin
+2. Use arrow keys or WASD to move your character
+3. Lead zombies into swamps to eliminate them
+4. Avoid stepping into swamps or touching zombies
+5. Clear all zombies to complete the level
 
 ## Game Controls
 
