@@ -112,6 +112,8 @@ class Zombie extends Entity {
         super(x, y);
         this.type = type;
         this.alive = true;
+        this.direction = 'down'; // Current facing direction
+        this.lastMove = null;
     }
 
     calculateMove(player) {
@@ -119,10 +121,12 @@ class Zombie extends Entity {
         const dx = player.x - this.x;
         const dy = player.y - this.y;
 
-        // Prioritize larger distance
+        // Prioritize larger distance and determine direction
         if (Math.abs(dx) > Math.abs(dy)) {
+            this.direction = dx > 0 ? 'right' : 'left';
             return dx > 0 ? DIRECTIONS.RIGHT : DIRECTIONS.LEFT;
         } else if (Math.abs(dy) > 0) {
+            this.direction = dy > 0 ? 'down' : 'up';
             return dy > 0 ? DIRECTIONS.DOWN : DIRECTIONS.UP;
         }
 
@@ -139,6 +143,7 @@ class Zombie extends Entity {
 
             // Check bounds
             if (newX >= 0 && newX < CONFIG.GRID_SIZE && newY >= 0 && newY < CONFIG.GRID_SIZE) {
+                this.lastMove = move;
                 this.moveTo(newX, newY);
             }
         }
@@ -153,7 +158,7 @@ class Game {
         this.swamps = [];
         this.player = null;
         this.zombies = [];
-        this.renderer = null;
+        this.spriteRenderer = new SpriteRenderer();
         this.audioManager = new AudioManager();
         this.turnTimer = null;
         this.isRunning = false;
@@ -575,13 +580,19 @@ class Game {
             this.drawTile(swamp.x, swamp.y, '#2a5f7f', '#1a4f6f');
         });
 
-        // Draw zombies
+        // Draw zombies with sprite system
         this.zombies.forEach(zombie => {
-            this.drawZombie(zombie.x, zombie.y);
+            const frame = this.spriteRenderer.getZombieFrame(zombie.direction, this.state.currentTurn);
+            frame.draw(this.ctx, zombie.x, zombie.y, CONFIG.TILE_SIZE);
         });
 
-        // Draw player
-        this.drawPlayer(this.player.x, this.player.y);
+        // Draw player with sprite system
+        this.spriteRenderer.sprites.player.default(this.ctx, this.player.x, this.player.y, CONFIG.TILE_SIZE);
+
+        // Draw shield effect if player has shield
+        if (this.player.hasShield) {
+            this.drawShieldEffect(this.player.x, this.player.y);
+        }
     }
 
     drawGrid() {
@@ -617,55 +628,29 @@ class Game {
         }
     }
 
-    drawPlayer(x, y) {
+    drawShieldEffect(x, y) {
         const pixelX = x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
         const pixelY = y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
         const radius = CONFIG.TILE_SIZE / 3;
 
-        // Draw player as circle
-        this.ctx.fillStyle = '#4a9d5f';
-        this.ctx.beginPath();
-        this.ctx.arc(pixelX, pixelY, radius, 0, Math.PI * 2);
-        this.ctx.fill();
+        // Animated shield ring
+        const pulseScale = 1 + Math.sin(this.state.currentTurn * 0.3) * 0.1;
 
-        // Draw outline
-        this.ctx.strokeStyle = '#5abd75';
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
-
-        // Draw shield if active
-        if (this.player.hasShield) {
-            this.ctx.strokeStyle = '#ffd700';
-            this.ctx.lineWidth = 2;
-            this.ctx.beginPath();
-            this.ctx.arc(pixelX, pixelY, radius + 5, 0, Math.PI * 2);
-            this.ctx.stroke();
-        }
-    }
-
-    drawZombie(x, y) {
-        const pixelX = x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
-        const pixelY = y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2;
-        const radius = CONFIG.TILE_SIZE / 3;
-
-        // Draw zombie as circle
-        this.ctx.fillStyle = '#8b0000';
-        this.ctx.beginPath();
-        this.ctx.arc(pixelX, pixelY, radius, 0, Math.PI * 2);
-        this.ctx.fill();
-
-        // Draw outline
-        this.ctx.strokeStyle = '#ff0000';
+        this.ctx.strokeStyle = '#ffd700';
         this.ctx.lineWidth = 2;
+        this.ctx.globalAlpha = 0.7;
+        this.ctx.beginPath();
+        this.ctx.arc(pixelX, pixelY, (radius + 8) * pulseScale, 0, Math.PI * 2);
         this.ctx.stroke();
 
-        // Draw eyes
-        this.ctx.fillStyle = '#ffff00';
-        const eyeRadius = 3;
+        // Outer glow
+        this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+        this.ctx.lineWidth = 4;
         this.ctx.beginPath();
-        this.ctx.arc(pixelX - 6, pixelY - 4, eyeRadius, 0, Math.PI * 2);
-        this.ctx.arc(pixelX + 6, pixelY - 4, eyeRadius, 0, Math.PI * 2);
-        this.ctx.fill();
+        this.ctx.arc(pixelX, pixelY, (radius + 12) * pulseScale, 0, Math.PI * 2);
+        this.ctx.stroke();
+
+        this.ctx.globalAlpha = 1.0;
     }
 
     showCombo(combo) {
