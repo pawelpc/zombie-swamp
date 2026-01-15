@@ -14,3 +14,14 @@ Thumbs.db
 
 # Temporary files
 *.tmp
+
+# Server files (not needed for GitHub Pages)
+server.js
+start-server.bat
+start-server.sh
+
+# Documentation (keep these actually, they're useful)
+# We'll keep all .md files
+
+# Local assets that were just for reference
+files from paul/
