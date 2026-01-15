@@ -365,45 +365,175 @@ class SpriteRenderer {
         ctx.save();
         ctx.translate(pixelX, pixelY);
 
-        // Player body (hero green)
-        ctx.fillStyle = '#4a9d5f';
-        ctx.beginPath();
-        ctx.arc(0, 0, radius, 0, Math.PI * 2);
-        ctx.fill();
+        // Legs (drawn first, behind body)
+        this.drawPlayerLeg(ctx, -radius * 0.3, radius * 0.7);
+        this.drawPlayerLeg(ctx, radius * 0.3, radius * 0.7);
 
-        // Player outline (brighter green)
-        ctx.strokeStyle = '#5abd75';
-        ctx.lineWidth = 3;
+        // Body/Torso (hero armor)
+        ctx.fillStyle = '#3a7d5f'; // Darker green for armor
+        ctx.beginPath();
+        ctx.ellipse(0, 0, radius * 0.85, radius * 1.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2a6d4f';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Face details
+        // Chest plate highlight
+        ctx.fillStyle = '#4a9d6f';
+        ctx.beginPath();
+        ctx.ellipse(0, -radius * 0.1, radius * 0.6, radius * 0.7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Arms
+        this.drawPlayerArm(ctx, -radius * 0.85, 0, -0.2, radius);
+        this.drawPlayerArm(ctx, radius * 0.85, 0, 0.2, radius);
+
+        // Head
+        const headSize = radius * 0.75;
+        ctx.fillStyle = '#ffd7a8'; // Skin tone
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9, headSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#e0b88a';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Hair
+        ctx.fillStyle = '#8b4513'; // Brown hair
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9 - headSize * 0.2, headSize * 0.9, Math.PI, Math.PI * 2);
+        ctx.fill();
+
+        // Hair strands
+        ctx.strokeStyle = '#6b3513';
+        ctx.lineWidth = 1.5;
+        for (let i = -1; i <= 1; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * headSize * 0.3, -radius * 0.9 - headSize * 0.7);
+            ctx.lineTo(i * headSize * 0.25, -radius * 0.9 - headSize * 0.3);
+            ctx.stroke();
+        }
+
+        // Eyes
         ctx.fillStyle = '#ffffff';
+        const eyeOffset = headSize * 0.3;
+        const eyeSize = headSize * 0.2;
+
         // Left eye
         ctx.beginPath();
-        ctx.arc(-radius * 0.3, -radius * 0.2, radius * 0.15, 0, Math.PI * 2);
+        ctx.arc(-eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize, 0, Math.PI * 2);
         ctx.fill();
         // Right eye
         ctx.beginPath();
-        ctx.arc(radius * 0.3, -radius * 0.2, radius * 0.15, 0, Math.PI * 2);
+        ctx.arc(eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize, 0, Math.PI * 2);
         ctx.fill();
 
         // Pupils
-        ctx.fillStyle = '#000000';
+        ctx.fillStyle = '#2a5f8f'; // Blue eyes
         ctx.beginPath();
-        ctx.arc(-radius * 0.3, -radius * 0.2, radius * 0.08, 0, Math.PI * 2);
+        ctx.arc(-eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize * 0.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(radius * 0.3, -radius * 0.2, radius * 0.08, 0, Math.PI * 2);
+        ctx.arc(eyeOffset, -radius * 0.9 - headSize * 0.05, eyeSize * 0.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Smile
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 1.5;
+        // Eye highlights (make eyes sparkle)
+        ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(0, radius * 0.1, radius * 0.5, 0.2, Math.PI - 0.2);
+        ctx.arc(-eyeOffset + eyeSize * 0.2, -radius * 0.9 - headSize * 0.15, eyeSize * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(eyeOffset + eyeSize * 0.2, -radius * 0.9 - headSize * 0.15, eyeSize * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eyebrows (heroic expression)
+        ctx.strokeStyle = '#6b3513';
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
+        // Left eyebrow
+        ctx.beginPath();
+        ctx.moveTo(-eyeOffset - eyeSize * 0.8, -radius * 0.9 - headSize * 0.35);
+        ctx.lineTo(-eyeOffset + eyeSize * 0.5, -radius * 0.9 - headSize * 0.3);
+        ctx.stroke();
+        // Right eyebrow
+        ctx.beginPath();
+        ctx.moveTo(eyeOffset - eyeSize * 0.5, -radius * 0.9 - headSize * 0.3);
+        ctx.lineTo(eyeOffset + eyeSize * 0.8, -radius * 0.9 - headSize * 0.35);
         ctx.stroke();
 
+        // Nose
+        ctx.strokeStyle = '#d0a88a';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, -radius * 0.9 + headSize * 0.05);
+        ctx.lineTo(headSize * 0.1, -radius * 0.9 + headSize * 0.15);
+        ctx.stroke();
+
+        // Smile (confident hero)
+        ctx.strokeStyle = '#c08060';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, -radius * 0.9 + headSize * 0.3, headSize * 0.45, 0.15, Math.PI - 0.15);
+        ctx.stroke();
+
+        // Belt (optional detail)
+        ctx.strokeStyle = '#8b6914';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(-radius * 0.8, radius * 0.5);
+        ctx.lineTo(radius * 0.8, radius * 0.5);
+        ctx.stroke();
+
+        // Belt buckle
+        ctx.fillStyle = '#ffd700';
+        ctx.fillRect(-radius * 0.15, radius * 0.4, radius * 0.3, radius * 0.2);
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-radius * 0.15, radius * 0.4, radius * 0.3, radius * 0.2);
+
         ctx.restore();
+    }
+
+    // Player arm
+    drawPlayerArm(ctx, x, y, angle, radius) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        ctx.strokeStyle = '#ffd7a8'; // Skin tone
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, radius * 0.6);
+        ctx.stroke();
+
+        // Hand
+        ctx.fillStyle = '#ffd7a8';
+        ctx.beginPath();
+        ctx.arc(0, radius * 0.6, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+
+    // Player leg
+    drawPlayerLeg(ctx, x, y) {
+        ctx.strokeStyle = '#3a5f4f'; // Dark pants
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + 8);
+        ctx.stroke();
+
+        // Boot
+        ctx.fillStyle = '#4a3520'; // Brown boot
+        ctx.beginPath();
+        ctx.arc(x, y + 8, 2.5, 0, Math.PI * 2);
+        ctx.fill();
     }
 
     // Get current animation frame for zombie
