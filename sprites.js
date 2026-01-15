@@ -1051,18 +1051,18 @@ class SpriteRenderer {
         const pixelX = x * size;
         const pixelY = y * size;
 
-        // Water/swamp base
-        ctx.fillStyle = '#1a3f4f'; // Dark murky water
+        // Water/swamp base - very dark green
+        ctx.fillStyle = '#0d1f0d'; // Very dark green swamp water
         ctx.fillRect(pixelX, pixelY, size, size);
 
-        // Slightly lighter water patches for depth
-        ctx.fillStyle = '#2a5f6f';
+        // Slightly lighter green patches for depth
+        ctx.fillStyle = '#1a2f1a';
         ctx.fillRect(pixelX + size * 0.2, pixelY + size * 0.3, size * 0.3, size * 0.3);
         ctx.fillRect(pixelX + size * 0.6, pixelY + size * 0.1, size * 0.25, size * 0.25);
         ctx.fillRect(pixelX + size * 0.1, pixelY + size * 0.7, size * 0.2, size * 0.2);
 
         // Border
-        ctx.strokeStyle = '#0a2f3f';
+        ctx.strokeStyle = '#050f05';
         ctx.lineWidth = 2;
         ctx.strokeRect(pixelX, pixelY, size, size);
 

@@ -587,9 +587,8 @@ class Game {
     render() {
         if (!this.ctx) return;
 
-        // Clear canvas
-        this.ctx.fillStyle = '#1a1a1a';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Draw mottled hunter green background
+        this.drawMottledBackground();
 
         // Draw grid lines
         this.drawGrid();
@@ -616,8 +615,57 @@ class Game {
         }
     }
 
+    drawMottledBackground() {
+        // Base hunter green color
+        this.ctx.fillStyle = '#355E3B';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Create mottled effect with random darker and lighter patches
+        const patchSize = 20;
+        const cols = Math.ceil(this.canvas.width / patchSize);
+        const rows = Math.ceil(this.canvas.height / patchSize);
+
+        // Use seeded random for consistent pattern across frames
+        const seed = 12345; // Fixed seed for consistent pattern
+        let random = seed;
+        const seededRandom = () => {
+            random = (random * 9301 + 49297) % 233280;
+            return random / 233280;
+        };
+
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const rand = seededRandom();
+
+                // Create variation in green shade
+                let shade;
+                if (rand < 0.3) {
+                    // Darker hunter green patches
+                    shade = '#2d4f30';
+                } else if (rand < 0.6) {
+                    // Base hunter green (do nothing, already painted)
+                    continue;
+                } else if (rand < 0.85) {
+                    // Lighter hunter green patches
+                    shade = '#3d6b42';
+                } else {
+                    // Occasional very dark patches
+                    shade = '#1f3a22';
+                }
+
+                this.ctx.fillStyle = shade;
+                this.ctx.fillRect(
+                    col * patchSize,
+                    row * patchSize,
+                    patchSize,
+                    patchSize
+                );
+            }
+        }
+    }
+
     drawGrid() {
-        this.ctx.strokeStyle = '#2a2a2a';
+        this.ctx.strokeStyle = '#2a3a2a';
         this.ctx.lineWidth = 1;
 
         for (let i = 0; i <= CONFIG.GRID_SIZE; i++) {
