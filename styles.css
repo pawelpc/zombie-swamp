@@ -53,10 +53,12 @@ body {
     right: 0;
     bottom: 0;
     overflow-y: auto;
+    z-index: 1;
 }
 
 .screen.active {
     display: block;
+    z-index: 10; /* Active screen always on top */
 }
 
 /* Menu Screen */
