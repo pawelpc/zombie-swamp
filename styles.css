@@ -4,6 +4,17 @@
     box-sizing: border-box;
 }
 
+html {
+    /* Prevent mobile scrolling/bouncing */
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    /* Prevent iOS Safari from bouncing */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+}
+
 body {
     font-family: 'Courier New', monospace;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -11,8 +22,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
+    position: fixed;
+    /* Prevent pull-to-refresh and overscroll */
+    overscroll-behavior: none;
+    /* Prevent touch callouts on iOS */
+    -webkit-touch-callout: none;
 }
 
 #game-container {
@@ -280,16 +297,25 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
-        overflow-y: auto;
+        overflow: hidden;
+        position: fixed;
     }
 
     #game-container {
         width: 100vw;
-        padding: 0.5rem;
+        max-height: 100vh;
+        max-height: 100dvh; /* Use dynamic viewport height for mobile */
+        padding: 0.25rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
 
     .screen {
-        padding: 1rem;
+        padding: 0.5rem;
+        max-height: calc(100vh - 1rem);
+        max-height: calc(100dvh - 1rem);
+        overflow-y: auto;
     }
 
     #menu-screen h1 {
@@ -335,6 +361,53 @@ body {
     #game-over-stats,
     #level-stats {
         font-size: 1.1rem;
+    }
+
+    /* Mobile game screen adjustments */
+    #game-screen {
+        padding: 0.25rem;
+        max-height: 100vh;
+        max-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #hud {
+        flex-shrink: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    #game-area {
+        flex-shrink: 1;
+        padding: 0.25rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Compact touch controls on mobile */
+    .touch-controls {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        gap: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    .touch-middle {
+        gap: 3rem;
+    }
+
+    .touch-button {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    #powerups-display {
+        margin-top: 0.5rem;
+        min-height: 40px;
+        flex-shrink: 0;
     }
 }
 
