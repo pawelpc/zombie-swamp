@@ -635,11 +635,59 @@ class Game {
             this.gameOver();
         } else {
             this.showMessage(message);
-            // Reset player to center
-            const center = Math.floor(CONFIG.GRID_SIZE / 2);
-            this.player.moveTo(center, center);
+            // Find safe spawn point away from zombies
+            const safeSpawn = this.findSafeSpawnPoint();
+            this.player.moveTo(safeSpawn.x, safeSpawn.y);
             this.updateUI();
         }
+    }
+
+    findSafeSpawnPoint() {
+        const center = Math.floor(CONFIG.GRID_SIZE / 2);
+
+        // First try the center
+        if (this.isPositionSafeFromZombies(center, center, 3)) {
+            return { x: center, y: center };
+        }
+
+        // Try positions in a spiral pattern outward from center
+        const maxAttempts = CONFIG.GRID_SIZE * CONFIG.GRID_SIZE;
+        for (let radius = 1; radius <= Math.floor(CONFIG.GRID_SIZE / 2); radius++) {
+            // Check positions in a square ring at this radius
+            for (let dx = -radius; dx <= radius; dx++) {
+                for (let dy = -radius; dy <= radius; dy++) {
+                    // Only check the perimeter of the ring
+                    if (Math.abs(dx) !== radius && Math.abs(dy) !== radius) continue;
+
+                    const x = center + dx;
+                    const y = center + dy;
+
+                    // Check if in bounds
+                    if (x < 0 || x >= CONFIG.GRID_SIZE || y < 0 || y >= CONFIG.GRID_SIZE) continue;
+
+                    // Check if not on swamp
+                    if (this.grid[y][x] === TILE.SWAMP) continue;
+
+                    // Check if safe from zombies
+                    if (this.isPositionSafeFromZombies(x, y, 3)) {
+                        return { x, y };
+                    }
+                }
+            }
+        }
+
+        // Fallback: just use center if no safe spot found (unlikely)
+        return { x: center, y: center };
+    }
+
+    isPositionSafeFromZombies(x, y, minDistance) {
+        for (const zombie of this.zombies) {
+            const dist = Math.abs(x - zombie.x) + Math.abs(y - zombie.y);
+            if (dist < minDistance) {
+                return false;
+            }
+        }
+        return true;
     }
 
     checkLevelComplete() {
