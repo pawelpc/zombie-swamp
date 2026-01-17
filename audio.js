@@ -79,16 +79,18 @@ class AudioManager {
     }
 
     // Ticking Clock Sound - synchronized with turn timer
-    playTickSound() {
+    // playbackRate: 1.0 = normal speed, >1.0 = faster, <1.0 = slower
+    playTickSound(playbackRate = 1.0) {
         if (!this.soundEnabled || !this.audioContext) return;
 
         this.resumeContext();
 
         // Use loaded audio buffer if available, otherwise fallback to generated sound
         if (this.audioBuffers['tick']) {
-            console.log('Playing grandfather clock tick (loaded audio)');
+            console.log(`Playing grandfather clock tick at ${playbackRate}x speed`);
             const source = this.audioContext.createBufferSource();
             source.buffer = this.audioBuffers['tick'];
+            source.playbackRate.value = playbackRate; // Set playback speed
 
             const gainNode = this.createGain(0.5); // Adjust volume as needed
             source.connect(gainNode);
@@ -355,7 +357,7 @@ class AudioManager {
     // Play sound by name (convenience method)
     play(soundName, ...args) {
         const soundMap = {
-            'tick': () => this.playTickSound(),
+            'tick': (playbackRate) => this.playTickSound(playbackRate),
             'splash': () => this.playSplashSound(),
             'footstep': () => this.playFootstepSound(),
             'death': () => this.playDeathSound(),

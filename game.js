@@ -512,8 +512,10 @@ class Game {
     executePlayerTurn() {
         this.state.currentTurn++;
 
-        // Play tick sound
-        this.playSound('tick');
+        // Play tick sound at speed matching player speed
+        // playbackRate: 1.0 at 1000ms, faster when speed < 1000ms
+        const playbackRate = 1000 / this.state.playerSpeed;
+        this.playSound('tick', playbackRate);
 
         // Execute player move (from queued input)
         this.player.executeMove(this.grid);
